@@ -1,0 +1,569 @@
+Sub cha()
+'
+' cha Macro
+'
+
+'
+    Sheets("Time-series").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    ActiveSheet.Shapes.AddChart.Select
+    ActiveChart.ChartType = xlLine
+    ActiveChart.SetSourceData Source:=Range("'Time-series'!$E$4:$E$1177")
+    ActiveChart.SeriesCollection(1).XValues = "='Time-series'!$D$3"
+    ActiveChart.SeriesCollection(1).XValues = "='Time-series'!$D$4:$D$1177"
+    ActiveChart.SeriesCollection(1).Name = "='Time-series'!$E$3"
+    Sheets("Time-series").Select
+    ActiveWindow.SmallScroll Down:=69
+
+    ActiveChart.Legend.Select
+    Selection.Delete
+    ActiveSheet.ChartObjects("Grafico 1").Activate
+    ActiveChart.SeriesCollection(1).Select
+    With Selection.Format.Line
+        .Visible = msoTrue
+        .Weight = 1.25
+    End With
+    Range("K1172").Select
+End Sub
+
+Sub generate_charts()
+Dim data As Range
+Dim date_range As Range
+
+Sheets("Time-series").Activate
+Set date_range = Range(Cells(5, 4), Cells(10000, 4))
+
+For i = 1 To 34
+
+    Set data = Range(Cells(5, 4 + i), Cells(10000, 4 + i))
+    
+    
+    ActiveSheet.Shapes.AddChart.Select
+        ActiveChart.ChartType = xlLine
+        ActiveChart.SetSourceData Source:=data
+        ActiveChart.SeriesCollection(1).XValues = date_range
+        ActiveChart.SeriesCollection(1).Name = Cells(3, 4 + i)
+        ActiveChart.Axes(xlValue).MajorGridlines.Select
+        Selection.Format.Line.Visible = msoFalse
+        With ActiveChart
+            .HasLegend = False
+        End With
+        
+        
+        With ActiveChart.SeriesCollection(1).Format.Line
+            .Visible = msoTrue
+            .Weight = 1.25
+        End With
+Next i
+End Sub
+
+Sub MoveMultipleCharts()
+    
+'    Sheets("Time-series").ChartObjects.Cut
+'    Application.Goto Sheets("Charts_Equity").Range("B2")
+'    Sheets("Charts_Equity").Paste
+'
+'    Dim ChartObj As Object
+
+
+For Each ChartObj In Sheets("Time-series").ChartObjects
+ChartObj.Chart.Location xlLocationAsObject, "Charts_Equity"
+Next ChartObj
+
+    
+End Sub
+
+Sub grifd()
+Dim data As Range
+Dim date_range As Range
+
+Sheets("Time-series").Activate
+Set date_range = Range(Cells(5, 4), Cells(10000, 4))
+
+col = 46
+
+    Set data = Range(Cells(5, col), Cells(10000, col))
+    
+    
+    ActiveSheet.Shapes.AddChart.Select
+        ActiveChart.ChartType = xlLine
+        ActiveChart.SetSourceData Source:=data
+        ActiveChart.SeriesCollection(1).XValues = date_range
+        ActiveChart.SeriesCollection(1).Name = Cells(3, col)
+        ActiveChart.Axes(xlValue).MajorGridlines.Select
+        Selection.Format.Line.Visible = msoFalse
+        With ActiveChart
+            .HasLegend = False
+        End With
+        
+        
+        With ActiveChart.SeriesCollection(1).Format.Line
+            .Visible = msoTrue
+            .Weight = 1.25
+        End With
+
+
+
+
+
+
+End Sub
+Sub CHcentralbanks()
+Dim data As Range
+Dim date_range As Range
+
+Sheets("Time-series").Activate
+Set date_range = Range(Cells(5, 4), Cells(10000, 4))
+
+col = 52
+
+    Set Data1 = Range(Cells(5, col), Cells(10000, col + 2))
+    
+    
+    ActiveSheet.Shapes.AddChart.Select
+        ActiveChart.ChartType = xlLine
+        ActiveChart.SetSourceData Source:=Data1
+
+        ActiveChart.SeriesCollection(1).XValues = date_range
+        ActiveChart.SeriesCollection(1).Name = Cells(3, col)
+        ActiveChart.SeriesCollection(2).Name = Cells(3, col + 1)
+        ActiveChart.SeriesCollection(3).Name = Cells(3, col + 2)
+        ActiveChart.Axes(xlValue).MajorGridlines.Select
+        Selection.Format.Line.Visible = msoFalse
+        With ActiveChart
+            .HasTitle = True
+            .ChartTitle.Text = Cells(1, col)
+            .HasLegend = True
+            .Legend.Position = xlLegendPositionTop
+        End With
+        
+        
+        With ActiveChart.SeriesCollection(1).Format.Line
+            .Visible = msoTrue
+            .Weight = 1.75
+            .ForeColor.RGB = RGB(198, 42, 141)
+        End With
+        With ActiveChart.SeriesCollection(2).Format.Line
+            .Visible = msoTrue
+            .Weight = 1.5
+            .ForeColor.RGB = RGB(39, 11, 141)
+        End With
+        With ActiveChart.SeriesCollection(3).Format.Line
+            .Visible = msoTrue
+            .Weight = 1.5
+            .ForeColor.RGB = RGB(65, 131, 141)
+        End With
+
+
+
+
+End Sub
+
+
+Sub lstLab()
+Dim oChart As ChartObject
+Dim MySeries As Series
+Count = Sheets("Time-series").Range("B7").Value
+For Each oChart In ActiveSheet.ChartObjects
+
+nseries = oChart.Chart.SeriesCollection.Count
+
+If nseries = 1 Then
+        For Each MySeries In oChart.Chart.SeriesCollection
+        
+            With oChart.Chart.SeriesCollection(1)
+                .HasDataLabels = True
+                End With
+        
+               MySeries.ApplyDataLabels (xlDataLabelsShowNone)
+        
+                MySeries.Points(Count).ApplyDataLabels
+        '
+            MySeries.DataLabels.NumberFormat = "#,##0.00"
+            MySeries.DataLabels.Position = xlLabelPositionBelow
+            Next MySeries
+Else
+'    For Each MySeries In oChart.Chart.SeriesCollection
+'
+'                With oChart.Chart.SeriesCollection
+'                    .HasDataLabels = True
+'                End With
+'
+'                MySeries.ApplyDataLabels (xlDataLabelsShowNone)
+'                MySeries.Points(Count).ApplyDataLabels
+'
+'                With oChart.Chart.SeriesCollection(2)
+'                    .HasDataLabels = True
+'                End With
+'
+'                MySeries.ApplyDataLabels (xlDataLabelsShowNone)
+'                MySeries.Points(Count).ApplyDataLabels
+'
+'                With oChart.Chart.SeriesCollection(3)
+'                .HasDataLabels = True
+'                End With
+'
+'                MySeries.ApplyDataLabels (xlDataLabelsShowNone)
+'                MySeries.Points(Count).ApplyDataLabels
+'
+'                MySeries.DataLabels.NumberFormat = "#,##0.00"
+'                MySeries.DataLabels.Position = xlLabelPositionBelow
+    For i = 1 To nseries
+        With oChart.Chart.SeriesCollection(i)
+           .HasDataLabels = True
+        End With
+        oChart.Chart.SeriesCollection(i).ApplyDataLabels (xlDataLabelsShowNone)
+        oChart.Chart.SeriesCollection(i).Points(Count).ApplyDataLabels
+        
+        oChart.Chart.SeriesCollection(i).DataLabels.NumberFormat = "#,##0.00"
+        oChart.Chart.SeriesCollection(i).DataLabels.Position = xlLabelPositionBelow
+
+    Next i
+    End If
+    
+Next oChart
+'MsgBox Count
+End Sub
+
+Sub toWords()
+Application.ScreenUpdating = False
+Dim wd As Object
+Dim ObjDoc As Object
+Dim FilePath As String
+Dim FileName As String
+Dim rng As Range
+FilePath = "Y:\Mobiliare\08 Finint Economia Reale Italia\01_Front Office\02 Gestione\Global Markets Report\"
+'FileName = "Test.docx"
+Dim WordDoc As Word.Document
+
+'check if template document is open in Word, otherwise open it
+On Error Resume Next
+Set wd = GetObject(, "Word.Application")
+If wd Is Nothing Then
+    Set wd = CreateObject("Word.Application")
+   ' Set ObjDoc = wd.Documents.Open(FilePath & "\" & FileName)
+Else
+   
+    Set ObjDoc = wd.Documents(FileName)
+    GoTo OpenAlready
+
+End If
+OpenAlready:
+On Error GoTo 0
+
+'find Bookmark in template doc
+wd.Visible = True
+wd.Documents.Add
+
+
+'copy chart from Excel
+
+' Sheets("Charts_Equity").ChartObjects("ChartA").Chart.ChartArea.Copy
+'
+' 'insert chart to Bookmark in template doc
+' wd.Selection.PasteSpecial Link:=False, _
+' DataType:=wdPasteMetafilePicture, _
+' Placement:=wdInLine, _
+' DisplayAsIcon:=False
+
+ Set rng = Range("B1:AB76")
+rng.Copy
+wd.Selection.PasteSpecial Link:=False, DataType:=wdPasteEnhancedMetafile, _
+Placement:=wdInLine, DisplayAsIcon:=False
+
+Set rngCur = Range("B77:AB116")
+rngCur.Copy
+wd.Selection.PasteSpecial Link:=False, DataType:=wdPasteEnhancedMetafile, _
+Placement:=wdInLine, DisplayAsIcon:=False
+
+Set rngVol = Range("B251:AB272")
+rngVol.Copy
+wd.Selection.PasteSpecial Link:=False, DataType:=wdPasteEnhancedMetafile, _
+Placement:=wdInLine, DisplayAsIcon:=False
+
+Set rngCom = Range("B117:AB174")
+rngCom.Copy
+wd.Selection.PasteSpecial Link:=False, DataType:=wdPasteEnhancedMetafile, _
+Placement:=wdInLine, DisplayAsIcon:=False
+
+Set rngGov = Range("B175:AB250")
+rngGov.Copy
+wd.Selection.PasteSpecial Link:=False, DataType:=wdPasteEnhancedMetafile, _
+Placement:=wdInLine, DisplayAsIcon:=False
+
+Set rngIT = Range("B273:AB294")
+rngIT.Copy
+wd.Selection.PasteSpecial Link:=False, DataType:=wdPasteEnhancedMetafile, _
+Placement:=wdInLine, DisplayAsIcon:=False
+
+Set rngCB = Range("B295:AB315")
+rngCB.Copy
+wd.Selection.PasteSpecial Link:=False, DataType:=wdPasteEnhancedMetafile, _
+Placement:=wdInLine, DisplayAsIcon:=False
+''''COPY AND PASTE TABLES
+
+Set tabEQ = Range("AM3:AS33")
+tabEQ.Copy
+wd.Selection.PasteSpecial Link:=False, DataType:=wdPasteEnhancedMetafile, _
+Placement:=wdInLine, DisplayAsIcon:=False
+
+Set tabCur = Range("AU3:BA32")
+tabCur.Copy
+wd.Selection.PasteSpecial Link:=False, DataType:=wdPasteEnhancedMetafile, _
+Placement:=wdInLine, DisplayAsIcon:=False
+
+Set tabCOM = Range("AM36:AS55")
+tabCOM.Copy
+wd.Selection.PasteSpecial Link:=False, DataType:=wdPasteEnhancedMetafile, _
+Placement:=wdInLine, DisplayAsIcon:=False
+
+Set tabGOV = Range("BC3:BI37")
+tabGOV.Copy
+wd.Selection.PasteSpecial Link:=False, DataType:=wdPasteEnhancedMetafile, _
+Placement:=wdInLine, DisplayAsIcon:=False
+
+Set tabBN = Range("BK3:BP12")
+tabBN.Copy
+wd.Selection.PasteSpecial Link:=False, DataType:=wdPasteEnhancedMetafile, _
+Placement:=wdInLine, DisplayAsIcon:=False
+
+Set tabSW = Range("BR3:BW51")
+tabSW.Copy
+wd.Selection.PasteSpecial Link:=False, DataType:=wdPasteEnhancedMetafile, _
+Placement:=wdInLine, DisplayAsIcon:=False
+
+Set tabCDS = Range("BC39:BG64")
+tabCDS.Copy
+wd.Selection.PasteSpecial Link:=False, DataType:=wdPasteEnhancedMetafile, _
+Placement:=wdInLine, DisplayAsIcon:=False
+
+wd.Selection.InsertBreak Type:=wdSectionBreakNextPage
+
+wd.Selection.PageSetup.Orientation = wdOrientLandscape
+
+
+nrelease = Sheets("ECO CALENDAR").Range("Q4")
+Set EcoCal = Range(Cells(3, 82), Cells(nrelease + 6, 93))
+EcoCal.Copy
+wd.Selection.PasteSpecial Link:=False, DataType:=wdPasteEnhancedMetafile, _
+Placement:=wdInLine, DisplayAsIcon:=False
+
+wd.Selection.PageSetup.Orientation = wdOrientLandscape
+
+Application.CutCopyMode = False
+
+With wd
+    .ActiveWindow.ActivePane.View.SeekView = wdSeekCurrentPageHeader
+    .Selection.TypeText Text:=Format(Date, "Short Date")
+    .Selection.Font.Bold = True
+    .Selection.Paragraphs.Alignment = wdAlignParagraphCenter
+    .ActiveWindow.ActivePane.View.SeekView = wdSeekCurrentPageFooter
+    .Selection.TypeText Text:="Page "
+    .Selection.Fields.Add Range:=.Selection.Range, Type:=wdFieldEmpty, Text:= _
+        "PAGE  ", PreserveFormatting:=True
+    .Selection.TypeText Text:=" of "
+    .Selection.Fields.Add Range:=.Selection.Range, Type:=wdFieldEmpty, Text:= _
+        "NUMPAGES  ", PreserveFormatting:=True
+    .Selection.ParagraphFormat.Alignment = wdAlignParagraphRight
+    .ActiveWindow.ActivePane.View.SeekView = wdSeekMainDocument
+End With
+
+If ThisWorkbook.Worksheets("Charts_Equity").o1.Value = True Then
+'    MsgBox "gatto"
+    wd.ActiveDocument.ExportAsFixedFormat "Y:\Mobiliare\08 Finint Economia Reale Italia\01_Front Office\02 Gestione\Global Markets Report\Report_" & Format(Now, "dd.mm.yy") & ".pdf", 17, OpenAfterExport:=True
+    
+Else
+    wd.ActiveDocument.ExportAsFixedFormat "Y:\Mobiliare\08 Finint Economia Reale Italia\01_Front Office\02 Gestione\Global Markets Report\Report_" & Format(Now, "dd.mm.yy") & ".pdf", 17
+'MsgBox "cane"
+
+
+End If
+
+Call tickbox
+wd.ActiveDocument.SaveAs FileName:="Y:\Mobiliare\08 Finint Economia Reale Italia\01_Front Office\02 Gestione\Global Markets Report\Report_" & Format(Now, "dd.mm.yy") & ".docx"
+wd.Quit
+Application.ScreenUpdating = True
+End Sub
+Sub tickbox()
+
+If ThisWorkbook.Worksheets("Charts_Equity").cb1.Value = True Then
+    Call emailReport
+End If
+End Sub
+
+
+
+Sub emailReport()
+
+
+Dim OutApp As Object
+Dim OutMail As Object
+Dim FileName As String
+FileName = "Y:\Mobiliare\08 Finint Economia Reale Italia\01_Front Office\02 Gestione\Global Markets Report\Report_" & Format(Now, "dd.mm.yy") & ".pdf"
+
+Set OutApp = CreateObject("Outlook.Application")
+Set OutMail = OutApp.CreateItem(olMailItem)
+
+
+
+On Error Resume Next
+str1 = "Ciao," & vbCrLf & "in allegato il Global Markets Report." & vbCrLf & "Un saluto," & vbCrLf & "Giulio Rossetti "
+With OutMail
+
+    If ThisWorkbook.Worksheets("Charts_Equity").Cb2.Value = True Then
+    emAdr = Sheets("Charts_Equity").Range("AD20").Text
+    .To = "giulio.rossetti@finint.com" & ";" & emAdr
+    Else
+    .To = "giulio.rossetti@finint.com"
+    End If
+    '.CC = "daniele.vadori@finint.com"
+    .BCC = ""
+    .body = str1
+    .Subject = "Global Markets Report " & " " & Format(Now, "dd.mm.yyyy")
+     
+    
+
+    .Attachments.Add FileName
+    .Display
+    .Send
+    End With
+    On Error GoTo 0
+
+    Set OutMail = Nothing
+    Set OutApp = Nothing
+
+
+
+
+
+End Sub
+
+Sub AUTOFIT_FOR_CHARTS()
+
+Dim oChart As ChartObject
+Dim MySeries As Series
+Dim s As Series, mins(), x
+
+If ThisWorkbook.Worksheets("Charts_Equity").cbAF.Value = True Then
+
+    For Each oChart In ActiveSheet.ChartObjects
+        ReDim mins(1 To oChart.Chart.SeriesCollection.Count)
+            For Each s In oChart.Chart.SeriesCollection
+                mins(1) = Application.Min(s.Values)
+            Next s
+        min_n = mins(1) - Abs(mins(1))
+        'oChart.Chart.Axes(xlValue).MinimumScale = 50 'Application.Min(min_n)
+        oChart.Chart.Axes(xlValue).MinimumScaleIsAuto = True
+    Next
+
+Else
+    
+    For Each oChart In ActiveSheet.ChartObjects
+        nseries = oChart.Chart.SeriesCollection.Count
+            ReDim mins(1 To oChart.Chart.SeriesCollection.Count)
+                For Each s In oChart.Chart.SeriesCollection
+                    mins(1) = Application.Min(s.Values)
+                Next s
+            min_n = mins(1) - 0.15 * Abs(mins(1))
+            If nseries = 1 Then
+            oChart.Chart.Axes(xlValue).MinimumScale = (min_n)
+            Else
+            oChart.Chart.Axes(xlValue).MinimumScaleIsAuto = True
+            End If
+    Next
+    
+
+End If
+'For Each s In cht.SeriesCollection
+'        mins(1) = Application.Min(s.Values)
+'
+'    Next s
+'MsgBox mins(1)
+'
+'min_n = mins(1) - Abs(mins(1))
+'
+'MsgBox min_n
+'
+'cht.Axes(xlValue).MinimumScale = Application.Min(min_n)
+''For Each oChart In ActiveSheet.ChartObjects
+''
+'nseries = oChart.Chart.SeriesCollection.Count
+'
+'        For Each MySeries In oChart.Chart.SeriesCollection
+'
+'        Min = MySeries.Values
+'            With oChart.Chart.SeriesCollection(1)
+'                .HasDataLabels = True
+'                End With
+'
+'               MySeries.ApplyDataLabels (xlDataLabelsShowNone)
+'
+'                MySeries.Points(Count).ApplyDataLabels
+'        '
+'            MySeries.DataLabels.NumberFormat = "#,##0.00"
+'            MySeries.DataLabels.Position = xlLabelPositionBelow
+'            Next MySeries
+
+
+
+End Sub
+
+Sub printTitleinNewSheet()
+h = 3
+For Each oChart In Sheets("Charts_Equity").ChartObjects
+
+Sheets("Titles").Cells(h, 15).Value = oChart.Chart.ChartTitle.Text
+h = h + 1
+Next oChart
+
+
+End Sub
+Sub setTitlesWStats()
+h = 3
+For Each oChart In Sheets("Charts_Equity").ChartObjects
+str1 = Sheets("Titles").Cells(h, 3)
+str2 = Sheets("Titles").Cells(h, 4)
+
+lstr1 = Len(str1)
+lstr2 = Len(str2)
+
+'MsgBox nstring
+'MsgBox ntot
+
+    With oChart.Chart
+        '.HasTitle = False
+        .HasTitle = True
+        .ChartTitle.Text = str1 & str2
+'        'ChartTitle.Text = Cells(h, 1).Value & Chr(10) & Cells(h, 8).Value
+        .ChartTitle.Characters(1, lstr1).Font.Size = 18
+        .ChartTitle.Characters(lstr1 + 1, lstr2).Font.Size = 12
+        .ChartTitle.Characters(lstr1 + 1, lstr2).Font.Bold = False
+     End With
+    h = h + 1
+
+Next
+
+
+End Sub
+
+Sub printChartNameinNewSheet()
+h = 3
+col = 12
+For Each oChart In Sheets("Charts_Equity").ChartObjects
+
+Sheets("Titles").Cells(h, col) = oChart.Chart.Name
+h = h + 1
+Next oChart
+End Sub
+
+
+Sub rename_chart()
+h = 3
+For Each oChart In Sheets("Charts_Equity").ChartObjects
+
+oChart.Name = Sheets("Titles").Cells(h, 1).Text
+h = h + 1
+Next oChart
+End Sub
+
+

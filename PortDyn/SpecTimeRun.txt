@@ -1,0 +1,29 @@
+Sub sayHi()
+
+Call Salva_con_nome
+Application.OnTime TimeSerial(17, 32, 0), "sayHi"
+End Sub
+
+
+Sub ref()
+Application.Run "RefreshEntireWorkbook"
+Application.Run "RefreshAllStaticData"
+
+End Sub
+
+Sub cRef()
+
+Call ref
+Application.OnTime TimeSerial(17, 25, 0), "cRef"
+
+End Sub
+
+'THISWORKBOOK
+Private Sub Workbook_Open()
+
+If Weekday(Date) = vbMonday Then Call dynamicCTG
+    
+    Application.OnTime TimeValue("17:32:00"), "sayHi"
+    Application.OnTime TimeValue("17:25:00"), "cRef"
+
+End Sub
