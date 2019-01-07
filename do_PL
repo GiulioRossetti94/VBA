@@ -1,0 +1,14 @@
+Sub doPL()
+
+For i = 1 To 34
+
+    n = Range(Cells(i, 2), Cells(i, 2).End(xlToRight)).Count
+    Debug.Print n
+    If InStr(Cells(i, n - 1), "-") > 0 Then
+        Cells(i, 16) = -1 * Cells(i, n)
+    Else
+        Cells(i, 16) = Cells(i, n)
+    End If
+Next i
+
+End Sub
