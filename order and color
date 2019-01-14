@@ -1,0 +1,50 @@
+Sub order1()
+    i = 1
+While i < 130
+    
+    Range(Cells(11 + i, 1), Cells(11 + i + 10, 2)).Select
+    ActiveWorkbook.Worksheets("sheet2").Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("sheet2").Sort.SortFields.Add Key:=Range(Cells(12 + i, 2), Cells(12 + i + 9, 2)) _
+        , SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+    With ActiveWorkbook.Worksheets("sheet2").Sort
+        .SetRange Range(Cells(11 + i, 1), Cells(11 + i + 10, 2))
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    
+    i = i + 11
+Wend
+End Sub
+
+Sub same_color()
+
+For i = 5 To 15
+    For j = 4 To 15
+    Cells(i, j).Font.Color = RGB(255, 255, 255)
+    Debug.Print Cells(i, j)
+        If Left(Cells(i, j), 2) = "EM" Then
+            Cells(i, j).Interior.ColorIndex = 3
+        ElseIf Left(Cells(i, j), 2) = "SM" Then Cells(i, j).Interior.ColorIndex = 7
+        ElseIf Left(Cells(i, j), 2) = "DM" Then Cells(i, j).Interior.ColorIndex = 39
+        ElseIf Left(Cells(i, j), 2) = "CO" Then Cells(i, j).Interior.ColorIndex = 25
+        ElseIf Left(Cells(i, j), 2) = "LA" Then Cells(i, j).Interior.ColorIndex = 43
+        ElseIf Left(Cells(i, j), 2) = "HY" Then Cells(i, j).Interior.ColorIndex = 46
+        ElseIf Left(Cells(i, j), 2) = "CA" Then Cells(i, j).Interior.ColorIndex = 50
+        ElseIf Left(Cells(i, j), 2) = "FI" Then Cells(i, j).Interior.ColorIndex = 22
+        ElseIf Left(Cells(i, j), 2) = "RE" Then Cells(i, j).Interior.ColorIndex = 56
+        End If
+    Next j
+Next i
+
+Set Rng = Range("D5:O13")
+With Rng.Borders
+    .LineStyle = xlContinuous
+    .Color = vbWhite
+    .Weight = xlThick
+End With
+
+
+End Sub
