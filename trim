@@ -1,0 +1,28 @@
+Sub trimming()
+
+For i = 1 To 2273
+
+    tick = Trim(Left(Cells(i, 1), 10))
+    Cells(i, 10) = tick
+    Cells(i, 11) = Trim(Replace(Cells(i, 1), tick, ""))
+    Cells(i, 12) = find_space(Cells(i, 11))
+    Cells(i, 13) = Trim(Right(Cells(i, 11), Len(Cells(i, 11)) - Cells(i, 12)))
+Next i
+
+
+End Sub
+
+Function find_space(str As String) As Integer
+l = Len(str)
+
+For i = 2 To l
+    If Mid(str, i, 1) = " " And Mid(str, i - 1, 1) = " " Then
+        GoTo nit
+    End If
+
+Next i
+
+nit:
+find_space = i - 1
+
+End Function
