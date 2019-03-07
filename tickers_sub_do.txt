@@ -1,0 +1,288 @@
+Sub generateTicker()
+
+Dim ws As Worksheet
+Dim wsDB As Worksheet
+Dim ind(2) As Variant
+Dim db() As Variant
+Dim name_s() As Variant
+Dim option_s() As Variant
+Dim set_trade() As Variant
+Dim tickMat() As Variant
+
+Set ws = Sheets("Ticker")
+Set wsDB = Sheets("DB Titoli")
+
+lcol = ws.Cells(7, 2).End(xlToRight).Column
+fcol = 2
+lrow = ws.Cells(7, 2).End(xlDown).Row
+frow = 7
+n = lrow - frow + 1
+k = lcol - fcol + 1
+
+ReDim set_trade(1 To n, 1 To k)
+ReDim tickMat(1 To n, 1 To 1)
+
+Set trade = ws.Range(ws.Cells(frow, fcol), ws.Cells(lrow, lcol))
+set_trade = trade.Value
+
+DBlcol = wsDB.Cells(3, 2).End(xlToRight).Column
+DBfcol = 2
+DBlrow = wsDB.Cells(3, 2).End(xlDown).Row
+DBfrow = 3
+DBn = DBlrow - DBfrow + 1
+DBk = DBlcol - DBfcol + 1
+
+Set stocksDB = wsDB.Range(wsDB.Cells(DBfrow, DBfcol), wsDB.Cells(DBlrow, DBlcol))
+
+ReDim db(1 To DBn, 1 To DBk)
+db = stocksDB.Value
+
+
+For i = fcol To lcol
+
+
+    If Trim(UCase(ws.Cells(6, i))) = "NAME" Then ind(1) = ws.Cells(6, i).Column
+        
+    If Trim(UCase(ws.Cells(6, i))) = "OPTION" Then ind(2) = ws.Cells(6, i).Column
+    
+Next i
+
+If ind(1) = "" Or ind(2) = "" Then GoTo ErrMsg
+
+ReDim name_s(1 To n, 1 To 1)
+ReDim option_s(1 To n, 1 To 1)
+Set RangeName = ws.Range(ws.Cells(frow, ind(1)), ws.Cells(lrow, ind(1)))
+Set RangeOption = ws.Range(ws.Cells(frow, ind(2)), ws.Cells(lrow, ind(2)))
+
+name_s = RangeName.Value
+option_s = RangeOption.Value
+
+For i = 1 To n
+    name_s(i, 1) = Trim(Replace(name_s(i, 1), "OPT ON ", ""))
+    name_s(i, 1) = Trim(Replace(name_s(i, 1), " S.p.A", ""))
+    name_s(i, 1) = Trim(Replace(name_s(i, 1), ".", ""))
+    name_s(i, 1) = Trim(Replace(name_s(i, 1), " SPA", ""))
+Next i
+
+
+'For i = 1 To n
+'    fl = 0
+'    For j = 1 To DBn
+'    If name_s(i, 1) = db(j, 1) Then
+'        fl = 1
+'        GoTo nxLoopi
+'    Else:
+'        If j < DBn Then
+'            GoTo nxLoopj
+'        Else: MsgBox name_s(i, 1)
+'        End If
+'    End If
+'nxLoopj:
+'    Next j
+'nxLoopi:
+'Next i
+
+        
+ws.Range(ws.Cells(frow, ind(1)), ws.Cells(lrow, ind(1))) = name_s
+
+On Error Resume Next
+Err.Clear
+For i = 1 To n
+
+    market = Application.WorksheetFunction.Index(wsDB.Range(wsDB.Cells(DBfrow, 4), wsDB.Cells(DBlrow, 4)), _
+            Application.WorksheetFunction.Match(name_s(i, 1), wsDB.Range(wsDB.Cells(DBfrow, 5), wsDB.Cells(DBlrow, 5)), 0))
+    tick = Application.WorksheetFunction.Index(wsDB.Range(wsDB.Cells(DBfrow, 3), wsDB.Cells(DBlrow, 3)), _
+            Application.WorksheetFunction.Match(name_s(i, 1), wsDB.Range(wsDB.Cells(DBfrow, 5), wsDB.Cells(DBlrow, 5)), 0))
+    month_n = nmonth(Mid(set_trade(i, ind(2) - fcol + 1), 1, 3))
+    nyear = Mid(set_trade(i, ind(2) - fcol + 1), 4, 2)
+    CorP = Mid(set_trade(i, ind(2) - fcol + 1), 7, 1)
+    Strike = Replace(Mid(set_trade(i, ind(2) - fcol + 1), 9), ".", ",")
+    Strike = Replace(CDbl(Strike), ",", ".")
+    
+    If Err.Number <> 0 Then
+    MsgBox "il titolo '" & name_s(i, 1) & "' non e' presente nel DB, aggiungerlo con relativi campi e riprovare!", vbCritical, "Name not found"
+    Exit Sub
+    End If
+    sTick = tick & " " & market & " " & month_n & "/" & nyear & " " & CorP & Strike & " Equity"
+    tickMat(i, 1) = sTick
+'    Debug.Print Strike
+Next i
+
+ws.Range(ws.Cells(frow, lcol + 3), ws.Cells(lrow, lcol + 3)) = tickMat
+Call fileSave
+Call SendEmail
+Exit Sub
+ErrMsg:
+MsgBox "Scrivere 'Name' e 'Option' sopra le relative colonne", vbCritical, "ERRORE!!"
+
+End Sub
+
+
+Sub fileSave()
+Dim ws As Worksheet
+Set ws = Sheets("Ticker")
+
+namethisfile = Application.ActiveWorkbook.FullName
+Application.ThisWorkbook.Save
+Namef = "OperazioniDynamic_" & Format(Now, "dd.mm.yy") & ".xlsm"
+Year_tod = Format(Now, "yyyy")
+month_tod = Format(Now, "mm.yy")
+
+Path = "Y:\Mobiliare\04 Finint Dynamic Equity\00_Documenti_Reportistica\03 Comitati\00 Comitati Tecnici Gestione\Operazioni\" & _
+        Year_tod & "\" & month_tod
+
+createFolder (Path)
+Application.DisplayAlerts = False
+ActiveWorkbook.SaveCopyAs Path & "\" & Namef
+
+Application.DisplayAlerts = True
+
+End Sub
+
+
+
+
+Function nmonth(str As String) As Integer
+Select Case str
+    Case "JAN"
+    nmonth = 1
+    Case "FEB"
+    nmonth = 2
+    Case "MAR"
+    nmonth = 3
+    Case "APR"
+    nmonth = 4
+    Case "MAY"
+    nmonth = 5
+    Case "JUN"
+    nmonth = 6
+    Case "JUL"
+    nmonth = 7
+    Case "AUG"
+    nmonth = 8
+    Case "SEP"
+    nmonth = 9
+    Case "OCT"
+    nmonth = 10
+    Case "NOV"
+    nmonth = 11
+    Case "DEC"
+    nmonth = 12
+    Case Else
+    nmonth = 9999
+
+End Select
+
+End Function
+Private Function checkFolderExistance(ByVal strFolderPath As String) As Boolean
+
+checkFolderExistance = Dir(strFolderPath, vbDirectory) <> vbNullString
+
+
+End Function
+
+Sub testingFunctions()
+
+dt = Format(Now(), "mm.yy")
+a = checkFolderExistance("Y:\Mobiliare\08 Finint Economia Reale Italia\00_Documenti_Reportistica\03 Comitati\2018\" & dt)
+
+MsgBox a
+End Sub
+
+
+Private Function createFolder(ByVal strFolderPath As String) As Boolean
+
+Dim strCurrentFolder As String
+Dim astrFolders() As String
+Dim i As Integer
+
+On Error GoTo ReturnFalse
+
+If checkFolderExistance(strFolderPath) Then GoTo ReturnTrue
+astrFolders = Split(strFolderPath, "\")
+
+For i = LBound(astrFolders) To UBound(astrFolders)
+  If astrFolders(i) <> vbNullString Then
+      If strCurrentFolder <> vbNullString Then
+        strCurrentFolder = strCurrentFolder & "\"
+      End If
+      strCurrentFolder = strCurrentFolder & astrFolders(i)
+      If Not checkFolderExistance(strCurrentFolder) Then
+        Call MkDir(strCurrentFolder)
+      End If
+    End If
+  Next i
+  
+ReturnTrue:
+  createFolder = True
+  Exit Function
+  
+ReturnFalse:
+  createFolder = False
+    
+End Function
+
+Sub ImportTxTfile()
+Dim ws As Worksheet
+
+
+Set ws = Sheets("Ticker")
+Application.Calculation = xlManual
+Application.ScreenUpdating = False
+ws.UsedRange.Delete
+Application.ScreenUpdating = True
+
+    With ActiveSheet.QueryTables.Add(Connection:= _
+        "TEXT;Y:\Mobiliare\04 Finint Dynamic Equity\00_Documenti_Reportistica\03 Comitati\00 Comitati Tecnici Gestione\Operazioni\Operazioni.txt" _
+        , Destination:=ws.Range("B7"))
+        .name = "Operazioni"
+        .FieldNames = True
+
+        .FillAdjacentFormulas = True
+
+        .SaveData = True
+        .AdjustColumnWidth = False
+        .RefreshPeriod = 0
+        .TextFilePlatform = 850
+        .TextFileStartRow = 1
+        .TextFileParseType = xlDelimited
+        .TextFileTextQualifier = xlTextQualifierDoubleQuote
+        .TextFileConsecutiveDelimiter = False
+        .TextFileTabDelimiter = True
+        .TextFileColumnDataTypes = Array(1, 1, 1, 1, 1, 1, 1, 1)
+        .TextFileDecimalSeparator = "."
+        .TextFileThousandsSeparator = " "
+        .TextFileTrailingMinusNumbers = True
+        .Refresh BackgroundQuery:=False
+    End With
+    
+With ws.Rows(6)
+    .Font.Bold = True
+    .Font.Color = RGB(255, 123, 159)
+    .Font.Size = 15
+End With
+
+Application.Calculation = xlCalculationAutomatic
+End Sub
+
+
+Sub SendEmail()
+Dim oApp As Object
+Dim oMail As Object
+
+Set oApp = CreateObject("Outlook.Application")
+Set oMail = oApp.CreateItem(0)
+
+yr = Year(Now())
+dt = Format(Now(), "mm.yy")
+
+'Debug.Print "path" & yr & "\" & dt & "\OperazioniDynamic_" & Format(Now(), "dd.mm.yy") & "xlsm"
+With oMail
+    .to = "name; namw"
+    .CC = ""
+    .Subject = "Ticker Operazioni Dynamic_" & Format(Now(), "dd.mm.yy")
+    .Body = ""
+    .Attachments.Add ("path" & yr & "\" & dt & "\OperazioniDynamic_" & Format(Now(), "dd.mm.yy") & ".xlsm")
+    .Display
+End With
+End Sub
