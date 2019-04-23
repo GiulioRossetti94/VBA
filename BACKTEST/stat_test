@@ -1,0 +1,50 @@
+Sub testingtest()
+
+Dim wa As Worksheet
+Dim ws As Worksheet
+Dim mat() As Variant
+Dim Bs As Variant
+Dim Ss() As Variant
+Set wa = Sheets("MA")
+Set ws = Sheets("Data")
+Dim buyIndColl As New Collection
+Dim sellIndColl As New Collection
+
+t = wa.Range(wa.Cells(4, 5), wa.Cells(4, 5).End(xlDown)).Count
+
+ReDim mat(1 To t, 1 To 2)
+
+For j = 1 To t
+    mat(j, 1) = ws.Cells(j + 3, 5)
+    mat(j, 2) = wa.Cells(j + 3, 5)
+Next j
+
+
+For i = 1 To t
+    If mat(i, 2) = 2 Then
+        buyIndColl.Add i
+    ElseIf mat(i, 2) = -2 Then
+        sellIndColl.Add i
+    End If
+Next i
+
+If buyIndColl.Count > sellIndColl.Count Then buyIndColl.Remove (1)
+
+numIter = 0
+retSum = 0
+For i = buyIndColl.Count To 1 Step -1
+    b_s = buyIndColl(i)
+    s_s = sellIndColl(i)
+
+    For j = b_s To s_s + 1 Step -1
+        retMu = mat(j - 1, 1) / mat(j, 1) - 1
+        numIter = numIter + 1
+'        Debug.Print retMu
+        retSum = retSum + retMu
+    Next j
+    
+Next i
+numIter = numIter
+
+FinalMuStrategy = retSum / numIter
+End Sub
