@@ -1,0 +1,198 @@
+Option Base 1
+'
+Public Const n = 12
+Public Const m = 26
+
+Sub Indicators()
+Dim price() As Variant
+Dim tDate() As Variant
+Dim MA_n() As Variant
+Dim MA_m() As Variant
+Dim diff_MA() As Variant
+Dim final_MA() As Variant
+Dim n As Integer
+Dim m As Integer
+Dim nE As Integer
+Dim t As Integer
+Dim ws As Worksheet
+Dim cht As Chart
+Dim mins() As Variant
+
+n = 12
+m = 26
+
+Set ws = Sheets("Data")
+
+nE = ws.Range(ws.Cells(3, 5), ws.Cells(3, 5).End(xlToRight)).Count
+t = ws.Range(ws.Cells(3, 5), ws.Cells(3, 5).End(xlDown)).Count - 1
+
+Set data = ws.Range(ws.Cells(4, 5), ws.Cells(t + 3, nE + 4))
+Set d = ws.Range(ws.Cells(4, 4), ws.Cells(t + 3, 4))
+
+Application.Calculation = xlManual
+Application.ScreenUpdating = False
+Sheets("MA").UsedRange.Delete
+Application.ScreenUpdating = True
+Application.Calculation = xlAutomatic
+
+ReDim price(1 To t, 1 To nE)
+ReDim tDate(1 To t, 1 To 1)
+
+prices = data.Value
+tDate = d.Value
+
+ReDim MA_n(1 To t - n, 1 To nE)
+ReDim MA_m(1 To t - m, 1 To nE)
+'Debug.Print t - m
+For k = 1 To nE
+    For i = 1 To t - n
+        tsum = 0
+        For j = 1 To n
+            tsum = tsum + prices(j + i, k)
+        Next j
+        MA_n(i, k) = tsum / n
+    Next i
+Next k
+
+
+For k = 1 To nE
+    For i = 1 To t - m
+        tsum = 0
+        For j = 1 To m
+            tsum = tsum + prices(j + i, k)
+        Next j
+        MA_m(i, k) = tsum / m
+    Next i
+Next k
+
+
+
+ReDim diff_MA(1 To t - Application.Max(m, n) + 1, 1 To nE)
+
+For i = 1 To nE
+    For j = 1 To UBound(diff_MA, 1) - 1
+        If MA_n(j, i) - MA_m(j, i) = 0 Then
+            diff_MA(j, i) = 0.00000001
+        Else
+            diff_MA(j, i) = MA_n(j, i) - MA_m(j, i)
+        End If
+    Next j
+Next i
+
+'Sheets("Foglio6").Range("N3:AD2000") = diff_MA
+ReDim final_MA(1 To UBound(diff_MA, 1) - 1, 1 To nE)
+
+For i = 1 To nE
+    For j = 1 To UBound(diff_MA, 1) - 1
+        final_MA(j, i) = Sgn(diff_MA(j, i)) - Sgn(diff_MA(j + 1, i))
+    Next j
+Next i
+'Sheets("Foglio6").Range("Q3:AF2000") = final_MA
+'Sheets("MA").Range("D4:AF359") = final_MA
+Sheets("MA").Range(Sheets("MA").Cells(4, 5), Sheets("MA").Cells(UBound(final_MA, 1) + 4 - 2, 4 + nE)) = final_MA
+Sheets("MA").Range(Sheets("MA").Cells(4, 4), Sheets("MA").Cells(t + 4 - 2, 4)) = tDate
+'Sheets("MA").Range(Sheets("MA").Cells(4, 5), Sheets("MA").Cells(2000, 25)) = final_MA
+Set wa = Sheets("MA")
+For i = 1 To nE
+    tbf = wa.Range(wa.Cells(4, 4 + i), wa.Cells(4, 4 + i).End(xlDown)).Count
+
+    While wa.Cells(tbf + 3, i + 4) <> 2
+        wa.Cells(tbf + 3, i + 4).ClearContents
+        tbf = tbf - 1
+    Wend
+Next i
+
+''================================================
+''Call for results table
+''================================================
+''
+Call getColWithStart
+
+
+''================================================
+''charts
+''================================================
+
+first_date = ws.Cells(4 + t - Application.Max(m, n) - 2, 4)
+last_date = ws.Cells(4, 4) + 2
+For i = 1 To nE
+
+Title_Str = "n = " & n & ", m = " & m & Chr(10) & ChrW(9670) & " BUY Signal" & Chr(10) & ChrW(9670) & " SELL Signal" & Chr(10) & Chr(10)
+    Title_Str = Title_Str & ws.Cells(3, 4 + i)
+    length_str = Len(ws.Cells(3, 4 + i)) + 1
+
+    Set cht = Charts.Add
+    cht.ChartType = xlXYScatterLines
+
+    With cht
+        For Each s In .SeriesCollection
+            s.Delete
+        Next s
+
+                With .SeriesCollection.NewSeries()
+            .Values = ws.Range(ws.Cells(4, 4 + i), ws.Cells(4 + t - Application.Max(m, n) - 2, 4 + i))
+            .XValues = ws.Range(ws.Cells(4, 4), ws.Cells(4 + t - Application.Max(m, n) - 2, 4))
+            cht.Axes(xlValue).MinimumScale = Application.Min(.Values) - 0.15 * Abs(Application.Min(.Values))
+
+        End With
+        .Axes(xlCategory).MinimumScale = first_date
+        .Axes(xlCategory).MaximumScale = last_date
+        .HasTitle = True
+        .ChartTitle.Text = Title_Str
+            With .ChartTitle
+'            .Top = 10
+'            .Left = 500
+            .Font.Bold = False
+            .Font.Size = 8
+            .Characters(Start:=16, Length:=1).Font.Color = RGB(0, 255, 0)
+            .Characters(Start:=29, Length:=1).Font.Color = RGB(255, 0, 0)
+            .Characters(Start:=43, Length:=length_str).Font.Size = 14
+            .Characters(Start:=43, Length:=length_str).Font.Bold = True
+            End With
+        .HasLegend = False
+        .Name = ws.Cells(3, 4 + i)
+    End With
+
+
+    Set srs = cht.SeriesCollection(1)
+
+        For p = 1 To srs.Points.Count '- Application.Max(m, n)
+
+            Set pt = srs.Points(p)
+
+            pt.MarkerStyle = xlMarkerStyleNone
+            pt.Format.Line.Weight = 0.1
+            With pt.Format.Fill
+                .Visible = msoTrue
+
+                If final_MA(p, i) = 2 Then
+                    pt.MarkerStyle = xlMarkerStyleDiamond
+                    .ForeColor.RGB = RGB(0, 255, 0)
+                    pt.MarkerSize = 10
+                 End If
+                If final_MA(p, i) = -2 Then
+                    pt.MarkerStyle = xlMarkerStyleDiamond
+                    .ForeColor.RGB = RGB(255, 0, 0)
+                    pt.MarkerSize = 10
+                End If
+            End With
+
+        Next p
+
+'Debug.Print 4 + t - Application.Max(m, n) - 2
+
+Next i
+
+Call makePPT
+
+Call delcharts
+End Sub
+
+
+Private Function sign(x) As Integer
+
+If x = 0 Then
+sign = 0
+Else: sign = x / Abs(x)
+End If
+End Function
