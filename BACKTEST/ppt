@@ -1,0 +1,77 @@
+Sub makePPT()
+
+Dim newPPT As PowerPoint.Application
+Dim Aslide As PowerPoint.Slide
+Dim table As Range
+
+Set table = Sheets("RetTable").Range("D3:O27")
+
+On Error Resume Next
+Set newPPT = GetObject(, "PowerPoint.Application")
+
+
+On Error GoTo 0
+
+If newPPT Is Nothing Then
+    Set newPPT = New PowerPoint.Application
+    End If
+
+If newPPT.Presentations.Count = 0 Then
+    newPPT.Presentations.Add
+    End If
+    
+ Application.ScreenUpdating = False
+newPPT.Visible = True
+newPPT.WindowState = 1
+ With newPPT.ActivePresentation
+
+    .PageSetup.FirstSlideNumber = 2
+    End With
+    newPPT.ActivePresentation.Slides.Add newPPT.ActivePresentation.Slides.Count + 1, ppLayoutText
+    newPPT.ActiveWindow.View.GotoSlide newPPT.ActivePresentation.Slides.Count
+    Set activeslide = newPPT.ActivePresentation.Slides(newPPT.ActivePresentation.Slides.Count)
+table.CopyPicture
+activeslide.Shapes.PasteSpecial(DataType:=ppPasteMetafilePicture).Select
+newPPT.ActiveWindow.Selection.ShapeRange.Left = 14.17
+newPPT.ActiveWindow.Selection.ShapeRange.Top = 48.75
+newPPT.ActiveWindow.Selection.ShapeRange.Width = 663.307
+newPPT.ActiveWindow.Selection.ShapeRange.Height = 318.047
+activeslide.Shapes(1).Delete
+activeslide.Shapes(1).Delete
+
+newPPT.ActivePresentation.Slides.Add newPPT.ActivePresentation.Slides.Count + 1, ppLayoutText
+    newPPT.ActiveWindow.View.GotoSlide newPPT.ActivePresentation.Slides.Count
+    Set activeslide = newPPT.ActivePresentation.Slides(newPPT.ActivePresentation.Slides.Count)
+    
+With activeslide.Shapes(1).TextFrame.TextRange
+    .Text = "n = " & n & ", m = " & m
+    .Font.Size = 40
+    .Font.Color = RGB(0, 0, 139)
+    .Font.Name = "Georgia"
+    .Font.Bold = True
+End With
+activeslide.Shapes(1).Left = 40
+activeslide.Shapes(1).Top = 175
+
+activeslide.Shapes(2).Delete
+
+For Each Cht_Sht In ActiveWorkbook.Charts
+    newPPT.ActivePresentation.Slides.Add newPPT.ActivePresentation.Slides.Count + 1, ppLayoutText
+    newPPT.ActiveWindow.View.GotoSlide newPPT.ActivePresentation.Slides.Count
+    Set activeslide = newPPT.ActivePresentation.Slides(newPPT.ActivePresentation.Slides.Count)
+    
+    Cht_Sht.ChartArea.Copy
+    activeslide.Shapes.PasteSpecial(DataType:=5, link:=msoFalse).Select
+    newPPT.ActiveWindow.Selection.ShapeRange.Left = 0
+    newPPT.ActiveWindow.Selection.ShapeRange.Top = 26#
+    newPPT.ActiveWindow.Selection.ShapeRange.Width = 715.1811
+    newPPT.ActiveWindow.Selection.ShapeRange.Height = 468
+    
+    activeslide.Shapes(1).Delete
+    
+      DoEvents
+    Application.Wait (Now + TimeValue("0:00:02"))
+  Next Cht_Sht
+
+
+End Sub
