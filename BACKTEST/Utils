@@ -1,0 +1,238 @@
+
+Sub getColWithStart()
+
+Dim wa As Worksheet
+Dim ws As Worksheet
+Dim mat() As Variant
+Dim pvect() As Variant
+Dim retRes() As Variant
+Dim price() As Variant
+Dim nameTit() As Variant
+Dim retMat() As Variant
+Dim retMediaMat() As Variant
+Dim StrategyMu() As Variant
+Dim MudivSig() As Variant
+Dim VarUt() As Variant
+Dim VarF() As Variant
+Dim tstat() As Variant
+Dim BuyHold() As Variant
+Dim StratCumRet() As Variant
+Dim Bs As Variant
+Dim Ss() As Variant
+Dim buyIndColl As Collection
+Dim sellIndColl As Collection
+Dim varianceStrat As Variant
+
+Set wa = Sheets("MA")
+Set ws = Sheets("Data")
+
+nE = ws.Range(ws.Cells(3, 5), ws.Cells(3, 5).End(xlToRight)).Count
+ts = ws.Range(ws.Cells(4, 5), ws.Cells(4, 5).End(xlDown)).Count
+'ta = wa.Range(wa.Cells(4, 5), wa.Cells(4, 5).End(xlDown)).Count
+
+Set data = ws.Range(ws.Cells(4, 5), ws.Cells(ts + 3, nE + 4))
+
+ReDim price(1 To ts, 1 To nE)
+ReDim nameTit(1 To nE, 1 To 1)
+ReDim N_signal(1 To nE, 1 To 1)
+ReDim retMat(1 To ts - 1, 1 To nE)
+ReDim retMediaMat(1 To nE, 1 To 1)
+ReDim StrategyMu(1 To nE, 1 To 1)
+ReDim MudivSig(1 To nE, 1 To 1)
+ReDim VarF(1 To nE, 1 To 1)
+ReDim tstat(1 To nE, 1 To 1)
+ReDim BuyHold(1 To nE, 1 To 1)
+ReDim StratCumRet(1 To nE, 1 To 1)
+ReDim VarUt(1 To ts - 1, 1 To 1)
+ReDim varianceStrat(1 To nE, 1 To 1)
+
+price = data.Value
+'compute returns
+
+
+For i = 1 To nE
+    retMedia = 0
+    For j = 1 To ts - 1
+        retMedia = retMedia + price(j, i) / price(j + 1, i) - 1
+        retMat(j, i) = price(j, i) / price(j + 1, i) - 1
+
+    Next j
+    retMediaMat(i, 1) = retMedia / (ts - 1)
+Next i
+
+'Sheets("Foglio1").Range("B2:U2020") = retMat
+
+For i = 1 To nE
+'    Debug.Print i
+    Set buyIndColl = New Collection
+    Set sellIndColl = New Collection
+    nameTit(i, 1) = ws.Cells(3, i + 4)
+'    tbf = wa.Range(wa.Cells(2, 4 + i), wa.Cells(2, 4 + i).End(xlDown)).Count
+'
+'    While wa.Cells(tbf + 3, i + 4) <> 2
+'        wa.Cells(tbf + 3, i + 4).ClearContents
+'        tbf = tbf - 1
+'    Wend
+        
+    t = wa.Range(wa.Cells(4, 4 + i), wa.Cells(4, 4 + i).End(xlDown)).Count
+        
+    ReDim mat(1 To t, 1 To 2)
+    
+    For gamma = 1 To ts - 1
+        VarUt(gamma, 1) = retMat(gamma, i)
+    Next gamma
+    
+'    VarUt = Application.Index(retMat, , i)
+    
+    For j = 1 To t
+        mat(j, 1) = ws.Cells(j + 3, i + 4)
+        mat(j, 2) = wa.Cells(j + 3, i + 4)
+    Next j
+    
+    a = 0
+    For k = t - 1 To 1 Step -1
+        If mat(k, 2) <> 0 Then a = a + 1
+    Next k
+'    Debug.Print a
+    N_signal(i, 1) = a
+    
+    ReDim pvect(1 To a + 1, 1 To 1)
+    
+    indmat = 1
+    For h = t - 1 To 1 Step -1
+        
+        If mat(h, 2) <> 0 Then
+            pvect(indmat + 1, 1) = mat(h, 1)
+            indmat = indmat + 1
+        End If
+    Next h
+    wa.Range(wa.Cells(4, 3), wa.Cells(3 + t, 3)) = Application.Index(mat, , 2)
+    pvect(1, 1) = mat(t, 1)
+    
+    
+        
+    ReDim retRes(1 To Int(a / 2 + 0.5), 1 To 1)
+    Sum = 0
+    vectindx = 1
+    For qu = LBound(pvect, 1) + 1 To UBound(pvect, 1) Step 2
+            ret = pvect(qu, 1) / pvect(qu - 1, 1) - 1
+            Sum = Sum + ret
+            retRes(vectindx, 1) = ret
+            vectindx = vectindx + 1
+            'Debug.Print ret
+'            Debug.Print pvect(qu, 1), qu, Format(ret, "#.##%")
+    Next qu
+    varianceStrat(i, 1) = Application.WorksheetFunction.Var_S(Application.Index(retRes, , 1))
+'    Sheets("RetResults").Range(Sheets("RetResults").Cells(4, i + 1), Sheets("RetResults").Cells(a / 2 + 3, i + 1)) = retRes
+'    Sheets("RetResults").Cells(2, i + 1) = pvect(UBound(pvect, 1), 1) / pvect(LBound(pvect, 1), 1) - 1
+'     Debug.Print varianceStrat(i, 1)
+    cumRet = 1
+    For phi = Int(a / 2 + 0.5) To 1 Step -1
+     cumRet = cumRet * (1 + retRes(phi, 1))
+'     Sheets("Foglio3").Cells(3 + phi, i + 1) = cumRet
+    Next phi
+    StratCumRet(i, 1) = cumRet - 1
+    
+    
+
+    For we = 1 To t
+        If mat(we, 2) = 2 Then
+            buyIndColl.Add we
+        ElseIf mat(we, 2) = -2 Then
+            sellIndColl.Add we
+        End If
+    Next we
+    
+    If buyIndColl.Count > sellIndColl.Count Then buyIndColl.Remove (1)
+'    Debug.Print buyIndColl.Count, sellIndColl.Count
+     Debug.Print
+    numIter = 0
+    retSum = 0
+    For rt = buyIndColl.Count To 1 Step -1
+        b_s = buyIndColl(rt)
+        s_s = sellIndColl(rt)
+        For j = b_s To s_s + 1 Step -1
+            retMu = mat(j - 1, 1) / mat(j, 1) - 1
+            numIter = numIter + 1
+
+            retSum = retSum + retMu
+        Next j
+        
+    Next rt
+    numIter = numIter
+    
+    FinalMuStrategy = retSum / numIter
+    StrategyMu(i, 1) = FinalMuStrategy
+    
+        
+    MudivSig(i, 1) = numIter
+'    Sheets("Foglio2").Range(Sheets("Foglio2").Cells(2, i + 1), Sheets("Foglio2").Cells(2013, i + 1)) = VarUt
+    
+    VarF(i, 1) = Application.WorksheetFunction.Var_P(VarUt)
+    tstat(i, 1) = (StrategyMu(i, 1) - retMediaMat(i, 1)) / (((VarF(i, 1) / ts) + (varianceStrat(i, 1) / numIter)) ^ 0.5)
+    BuyHold(i, 1) = pvect(UBound(pvect, 1), 1) / pvect(LBound(pvect, 1), 1) - 1
+
+Next i
+
+
+
+first_date = ws.Cells(4 + ts - Application.Max(m, n) - 2, 4)
+last_date = ws.Cells(4, 4) + 2
+le_Str = "n = " & n & ", m = " & m
+Period_date = first_date & " - " & last_date
+
+'Sheets("Foglio5").Range("G4:G100") = pvect
+Sheets("RetTable").Range(Sheets("RetTable").Cells(11, 4), Sheets("RetTable").Cells(11 + nE - 1, 4)) = nameTit
+Sheets("RetTable").Range(Sheets("RetTable").Cells(11, 5), Sheets("RetTable").Cells(11 + nE - 1, 5)) = Period_date
+Sheets("RetTable").Range(Sheets("RetTable").Cells(11, 6), Sheets("RetTable").Cells(11 + nE - 1, 6)) = le_Str
+Sheets("RetTable").Range(Sheets("RetTable").Cells(11, 7), Sheets("RetTable").Cells(11 + nE - 1, 7)) = BuyHold
+Sheets("RetTable").Range(Sheets("RetTable").Cells(11, 8), Sheets("RetTable").Cells(11 + nE - 1, 8)) = StratCumRet
+Sheets("RetTable").Range(Sheets("RetTable").Cells(11, 9), Sheets("RetTable").Cells(11 + nE - 1, 9)) = N_signal
+Sheets("RetTable").Range(Sheets("RetTable").Cells(11, 10), Sheets("RetTable").Cells(11 + nE - 1, 10)) = ts
+Sheets("RetTable").Range(Sheets("RetTable").Cells(11, 11), Sheets("RetTable").Cells(11 + nE - 1, 11)) = retMediaMat
+Sheets("RetTable").Range(Sheets("RetTable").Cells(11, 12), Sheets("RetTable").Cells(11 + nE - 1, 12)) = StrategyMu
+Sheets("RetTable").Range(Sheets("RetTable").Cells(11, 13), Sheets("RetTable").Cells(11 + nE - 1, 13)) = MudivSig
+Sheets("RetTable").Range(Sheets("RetTable").Cells(11, 14), Sheets("RetTable").Cells(11 + nE - 1, 14)) = VarF
+Sheets("RetTable").Range(Sheets("RetTable").Cells(11, 15), Sheets("RetTable").Cells(11 + nE - 1, 15)) = tstat
+
+Dim header(1 To 1, 1 To 13)
+header(1, 2) = "Ticker"
+header(1, 3) = "Period"
+header(1, 4) = "Parameters"
+header(1, 5) = "Buy & Hold"
+header(1, 6) = "Cum Ret Strategy"
+header(1, 7) = "N Signals"
+header(1, 8) = "N periods"
+header(1, 9) = "Unconditional Mean Ret"
+header(1, 10) = "Mean Ret Strategy"
+header(1, 11) = "Buy periods (in days)"
+header(1, 12) = "Variance"
+header(1, 13) = "T stat"
+
+Sheets("RetTable").Range(Sheets("RetTable").Cells(10, 3), Sheets("RetTable").Cells(10, 15)) = header
+
+End Sub
+
+Sub finalTableResults()
+Set ws = Sheets("Data")
+ts = ws.Range(ws.Cells(4, 5), ws.Cells(4, 5).End(xlDown)).Count
+
+
+
+Debug.Print ts
+
+
+
+
+End Sub
+
+Sub delcharts()
+
+For Each Cht_Sht In ActiveWorkbook.Charts
+    Application.DisplayAlerts = False
+    Cht_Sht.Delete
+    Application.DisplayAlerts = True
+Next
+
+End Sub
+
