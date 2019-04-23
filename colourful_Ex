@@ -1,0 +1,6 @@
+Private Sub Worksheet_SelectionChange(ByVal Target As Range)
+If Target.Cells.count > 1 Then Exit Sub
+    If Not Intersect(Target, Range("M28", "AZ67")) Is Nothing Then
+        Target.Interior.Color = RGB(WorksheetFunction.RandBetween(0, 255), WorksheetFunction.RandBetween(0, 255), WorksheetFunction.RandBetween(0, 255))
+    End If
+End Sub
