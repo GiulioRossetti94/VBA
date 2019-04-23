@@ -48,7 +48,7 @@ With wrdDoc
     .Paragraphs(5).Range.Font.Size = 11
     .Content.InsertParagraphAfter
     .Content.InsertAfter "Nei Giorni dal " & day_td & " al " & day_td + 4 & " " & Format(Now(), "mmmm yyyy") & _
-                        " alle ore 9:00 in Conegliano presso la sede sociale in Via Alfieri, 1 si è riunito il Comitato Investimenti" & _
+                        " alle ore 9:00 in Conegliano presso la sede sociale in Via Alfieri, 1 si Ã¨ riunito il Comitato Investimenti" & _
                         " di Finanziaria Internazionale Investments SGR con il seguente ordine del giorno:" & Chr(10)
                         
     .Paragraphs(6).Range.Font.Size = 11
