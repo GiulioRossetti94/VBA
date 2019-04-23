@@ -1,0 +1,36 @@
+Sub ColorScatterPoints()
+    Dim cht As Chart
+    Dim srs As Series
+'    Dim srs2 As Series
+    Dim pt As Point
+    Dim pt2 As Point
+    Dim p As Long
+    Dim Vals$, lTrim#, rTrim#
+    Dim valRange As Range, cl As Range
+    Dim myColor As Long
+
+    Set cht = ActiveSheet.ChartObjects(1).Chart
+    Set srs = cht.SeriesCollection(1)
+    srs2 = cht.SeriesCollection(2).Values
+    
+    
+For p = 1 To srs.Points.Count
+        Set pt = srs.Points(p)
+        With pt.Format.Fill
+            .Visible = msoTrue
+        If srs2(p) = 2 Then
+        .ForeColor.RGB = RGB(0, 255, 0)
+        pt.MarkerSize = 10
+        End If
+        If srs2(p) = -2 Then
+        .ForeColor.RGB = RGB(255, 0, 0)
+        pt.MarkerSize = 10
+        End If
+        End With
+        
+'        pt.MarkerSize = 4
+        
+        
+Next p
+
+End Sub
