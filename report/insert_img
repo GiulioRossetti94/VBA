@@ -1,0 +1,149 @@
+Sub putting_charts_in_sheets()
+Dim ws_perf As Worksheet
+Dim shp As Shape
+Dim shp2 As Shape
+
+
+Application.ScreenUpdating = False
+Set ws_perf = Worksheets("Perf Chart")
+Set ws_pir = Worksheets("PIR Chart")
+Set ws_eqt = Worksheets("EQUITY Chart")
+Set ws_bond = Worksheets("BOND Chart")
+Set ws_perf_anal = Worksheets("Performance analysis")
+Set ws_pic = Worksheets("ZZZ_pic")
+Set ws_sub = Worksheets("Subs")
+Set ws_var = Worksheets("Var")
+
+ws_pir.Columns("K:Y").ColumnWidth = 10.57
+ws_eqt.Columns("K:Y").ColumnWidth = 8.58
+ws_bond.Columns("K:Y").ColumnWidth = 8.58
+
+
+
+'For Each shp2 In ws_pir.Shapes
+'    shp2.Delete
+'Next shp2
+'
+For Each shp In ws_perf.Shapes
+
+    If shp.Name = "TOP 10" Or shp.Name = "TOP 10 ISSUERS" Then
+        shp.Width = ConvertCmToPoint(14.66)
+        shp.Height = ConvertCmToPoint(10.35)
+        shp.Copy
+        If shp.Name = "TOP 10" Then
+            ws_pir.Range("S7").PasteSpecial (xlPasteAll)
+        Else
+            ws_pir.Range("S28").PasteSpecial (xlPasteAll)
+        End If
+    End If
+
+    If shp.Name = "FUND PIC REPORT" Then
+        shp.Width = ConvertCmToPoint(12.2)
+        shp.Height = ConvertCmToPoint(22.28)
+        shp.Copy
+        ws_pir.Range("L7").PasteSpecial (xlPasteAll)
+    End If
+    
+    If shp.Name = "EQUITY PIC REPORT" Then
+        shp.Width = ConvertCmToPoint(25.74)
+        shp.Height = ConvertCmToPoint(22.28)
+        shp.Copy
+        ws_eqt.Range("K7").PasteSpecial (xlPasteAll)
+    End If
+    
+    If shp.Name = "BOND PIC REPORT" Then
+        shp.Width = ConvertCmToPoint(25.74)
+        shp.Height = ConvertCmToPoint(22.28)
+        shp.Copy
+        ws_bond.Range("K7").PasteSpecial (xlPasteAll)
+    End If
+    
+    If shp.Name = "SEASONALITY" Then
+        shp.Width = ConvertCmToPoint(23.66)
+        shp.Height = ConvertCmToPoint(13.01)
+        shp.Copy
+        ws_perf_anal.Range("M50").PasteSpecial (xlPasteAll)
+    End If
+    
+    If shp.Name = "Performance YTD" Then
+        shp.Width = ConvertCmToPoint(16.64)
+        shp.Height = ConvertCmToPoint(9.66)
+        shp.Copy
+        ws_perf_anal.Range("B4").PasteSpecial (xlPasteAll)
+    End If
+
+    If shp.Name = "Performance inception" Then
+        shp.Width = ConvertCmToPoint(16.74)
+        shp.Height = ConvertCmToPoint(12.1)
+        shp.Copy
+        ws_perf_anal.Range("B51").PasteSpecial (xlPasteAll)
+    End If
+    
+    If shp.Name = "Performance attribution monthly" Then
+        shp.Width = ConvertCmToPoint(24.14)
+        shp.Height = ConvertCmToPoint(12.1)
+        shp.Copy
+        ws_perf_anal.Range("M11").PasteSpecial (xlPasteAll)
+    End If
+    Application.CutCopyMode = False
+
+
+    If shp.Name = "ROLLING BETA" Or shp.Name = "ROLLING CORR" Then
+        shp.Width = ConvertCmToPoint(18.7)
+        shp.Height = ConvertCmToPoint(11.1)
+        shp.Copy
+        If shp.Name = "ROLLING BETA" Then
+            ws_pic.Range("O4").PasteSpecial (xlPasteAll)
+        Else
+            ws_pic.Range("C4").PasteSpecial (xlPasteAll)
+        End If
+    End If
+    
+    If shp.Name = "FUND ALLOCATION TS" Or shp.Name = "LAST YEAR " Then
+        shp.Width = ConvertCmToPoint(18.7)
+        shp.Height = ConvertCmToPoint(12.15)
+        shp.Copy
+        If shp.Name = "FUND ALLOCATION TS" Then
+            ws_pic.Range("C29").PasteSpecial (xlPasteAll)
+        Else
+            ws_pic.Range("O29").PasteSpecial (xlPasteAll)
+        End If
+    End If
+
+     If shp.Name = "NET SUBS" Or shp.Name = "CUM NET SUBS" Then
+        shp.Width = ConvertCmToPoint(18.7)
+        shp.Height = ConvertCmToPoint(11.55)
+        shp.Copy
+        If shp.Name = "NET SUBS" Then
+            ws_sub.Range("O5").PasteSpecial (xlPasteAll)
+        Else
+            ws_sub.Range("O29").PasteSpecial (xlPasteAll)
+        End If
+    End If
+
+     If shp.Name = "VAR PARAMETRIC" Or shp.Name = "VAR FILTERED" Then
+        shp.Width = ConvertCmToPoint(18.7)
+        shp.Height = ConvertCmToPoint(12.15)
+        shp.Copy
+        If shp.Name = "VAR PARAMETRIC" Then
+            ws_var.Range("M4").PasteSpecial (xlPasteAll)
+        Else
+            ws_var.Range("M28").PasteSpecial (xlPasteAll)
+        End If
+    End If
+
+
+Next shp
+Application.ScreenUpdating = True
+Call insert_disc
+End Sub
+
+Sub insert_disc()
+Path = "Y:\Mobiliare\08 Finint Economia Reale Italia\01_Front Office\02 Gestione\Report\disc.png"
+With Sheets("Disclaimer").Pictures.Insert(Path)
+
+    .Left = Sheets("Disclaimer").Range("c7").Left
+    .Top = Sheets("Disclaimer").Range("c7").Top
+    .Placement = 1
+End With
+End Sub
