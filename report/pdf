@@ -1,0 +1,239 @@
+Sub print_area()
+
+Dim sheet_name() As Variant
+Application.ErrorCheckingOptions.NumberAsText = False
+Sheets("Equity port").Visible = xlSheetVisible
+Sheets("Bond port").Visible = xlSheetVisible
+    Application.ScreenUpdating = False
+    Application.Calculation = False
+    Application.DisplayAlerts = False '
+    Application.EnableEvents = False
+    Application.StatusBar = "YO MADDAFAKKA"
+    
+dt = Format(Now(), "mm.yy")
+y = Format(Now(), "yyyy")
+
+date_report = Sheets("Pir performance").Cells(1, 1).End(xlDown)
+'Debug.Print date_report
+NameFolder = "Y:\Mobiliare\08 Finint Economia Reale Italia\01_Front Office\02 Gestione\Report\" & y & "\" & dt & "\"
+NameFile = NameFolder & "FERI_REPORT_" & date_report & ".pdf"
+createFolder (NameFolder)
+
+i = 0
+While i < 4
+    For Each sh In Array("Equity port", "Bond port")
+        Set ws = Worksheets(sh)
+        ws.Copy after:=Sheets(Sheets.Count)
+        Set test = ActiveSheet
+        
+        If ws.Name = "Bond port" Then
+            test.Name = "Z" & sh & i
+        Else
+            test.Name = sh & i
+        End If
+        If i < 2 Then
+            test.Columns("V:X").Delete
+            test.Columns("Q:T").Delete
+            test.Columns("D:F").Delete
+'            test.Range(Range("M:M"), Range("M:M").End(xlToRight)).EntireColumn.Delete
+        ElseIf i < 4 Then
+            test.Columns("M:P").Delete
+            test.Columns("H:I").Delete
+        Else
+            test.Columns("Q:X").Delete
+            test.Columns("H:I").Delete
+
+        End If
+        i = i + 1
+    Next sh
+Wend
+n_visible = 0
+
+
+For Each sh In ThisWorkbook.Sheets
+ If sh.Visible Then
+    n_visible = n_visible + 1
+        Set ws = sh
+        
+        With ws.PageSetup
+            .Zoom = False
+            .TopMargin = 36
+            .Orientation = xlLandscape
+            .PrintArea = ws.UsedRange.Address
+            If sh.Name = "PIR Chart" Or sh.Name = "EQUITY Chart" Or sh.Name = "BOND Chart" Or sh.Name = "Disclaimer" Then
+                .PrintArea = "$C$2:$Y$50"
+            ElseIf sh.Name = "First Page" Or sh.Name = "Performance analysis" Then
+                .PrintArea = sh.UsedRange.Address
+            Else
+                Set cLastCell = ws.Cells.Find(What:="*", after:=ws.Cells(1, 1), LookIn:=xlFormulas, LookAt:= _
+                    xlPart, SearchOrder:=xlByColumns, SearchDirection:=xlPrevious, MatchCase:=False)
+                .PrintArea = "$C$3:" & cLastCell.Address
+                
+            End If
+            .FitToPagesTall = 1
+            .FitToPagesWide = 1
+            .LeftMargin = Application.CentimetersToPoints(0.5)
+            .RightMargin = Application.CentimetersToPoints(0.5)
+            .CenterHeader = "FININT ECONOMIA REALE ITALIA"
+            .RightHeader = "Report as of: " & date_report
+            .CenterFooter = "Printed &D &T"
+            .RightFooter = "Page &P of &N"
+        End With
+    End If
+Next sh
+Call order
+ReDim sheet_name(1 To n_visible - 2)
+i = 1
+For Each sh In ThisWorkbook.Sheets
+    If sh.Visible Then
+        sheet_name(i) = sh.Name
+        i = i + 1
+    End If
+Next sh
+
+Sheets(sheet_name).Select
+'Sheets(Array("First Page", "Performance analysis", "PIR Chart", "EQUITY Chart", "Equity port", "Bond Chart", "Bond port")).Select
+'
+ActiveSheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:= _
+        (NameFile) _
+        , Quality:=xlQualityStandard, IncludeDocProperties:=True, IgnorePrintAreas _
+        :=False, OpenAfterPublish:=True
+
+Application.ScreenUpdating = True
+Application.Calculation = True
+Application.DisplayAlerts = True
+Application.EnableEvents = True
+Application.StatusBar = False
+Application.ErrorCheckingOptions.NumberAsText = True
+End Sub
+
+
+Sub copy_sheet()
+i = 0
+While i < 6
+    For Each sh In Array("Equity port", "Bond port")
+        Set ws = Worksheets(sh)
+        ws.Copy after:=Sheets(Sheets.Count)
+        Set test = ActiveSheet
+        
+        If ws.Name = "Bond port" Then
+            test.Name = "Z" & sh & i
+        Else
+            test.Name = sh & i
+        End If
+        If i < 2 Then
+            test.Columns("M:X").Delete
+            test.Range(Range("M:M"), Range("M:M").End(xlToRight)).EntireColumn.Delete
+        ElseIf i < 4 Then
+            test.Columns("Q:X").Delete
+            test.Columns("H:I").Delete
+
+        Else
+            test.Columns("M:P").Delete
+            test.Columns("H:I").Delete
+
+        End If
+        i = i + 1
+    Next sh
+Wend
+
+
+End Sub
+
+Sub sheet_visible()
+Dim rLastCell As Range
+Set ws = Worksheets("Equity port4")
+
+Set rLastCell = ws.Cells.Find(What:="*", after:=ws.Cells(1, 1), LookIn:=xlFormulas, LookAt:= _
+xlPart, SearchOrder:=xlByColumns, SearchDirection:=xlPrevious, MatchCase:=False)
+
+Set cLastCell = ws.Cells.Find(What:="*", after:=ws.Cells(1, 1), LookIn:=xlFormulas, LookAt:= _
+xlPart, SearchOrder:=xlByColumns, SearchDirection:=xlPrevious, MatchCase:=False)
+
+MsgBox ("The last used column is: " & cLastCell.Address)
+
+
+End Sub
+
+Sub SortWorkBook()
+
+For i = 6 To Application.Sheets.Count
+    For j = 6 To Application.Sheets.Count - 1
+
+            If UCase$(Application.Sheets(j).Name) > UCase$(Application.Sheets(j + 1).Name) Then
+                Sheets(j).Move after:=Sheets(j + 1)
+            End If
+
+    Next
+Next
+End Sub
+
+Sub order()
+
+For Each sh In ThisWorkbook.Sheets
+ If sh.Visible Then
+    If InStr(sh.Name, "Equity port") > 0 Then
+        sh.Move after:=Worksheets("EQUITY Chart")
+        End If
+    End If
+Next sh
+
+For Each sh In ThisWorkbook.Sheets
+ If sh.Visible Then
+    If InStr(sh.Name, "Bond port") > 0 Then
+        sh.Move after:=Worksheets("BOND Chart")
+        End If
+    End If
+Next sh
+
+Sheets("Equity port").Visible = xlSheetHidden
+Sheets("Bond port").Visible = xlSheetHidden
+End Sub
+Sub Unhide_Sheets_Containing()
+Dim ws As Worksheet
+    
+    For Each ws In ActiveWorkbook.Worksheets
+        If InStr(ws.Name, "Bond port") > 0 Then
+            ws.Visible = xlSheetVisible
+        End If
+    Next ws
+
+End Sub
+
+Private Function createFolder(ByVal strFolderPath As String) As Boolean
+
+Dim strCurrentFolder As String
+Dim astrFolders() As String
+Dim i As Integer
+
+On Error GoTo ReturnFalse
+
+If checkFolderExistance(strFolderPath) Then GoTo ReturnTrue
+astrFolders = Split(strFolderPath, "\")
+
+For i = LBound(astrFolders) To UBound(astrFolders)
+  If astrFolders(i) <> vbNullString Then
+      If strCurrentFolder <> vbNullString Then
+        strCurrentFolder = strCurrentFolder & "\"
+      End If
+      strCurrentFolder = strCurrentFolder & astrFolders(i)
+      If Not checkFolderExistance(strCurrentFolder) Then
+        Call MkDir(strCurrentFolder)
+      End If
+    End If
+  Next i
+  
+ReturnTrue:
+  createFolder = True
+  Exit Function
+  
+ReturnFalse:
+  createFolder = False
+    
+End Function
+Private Function checkFolderExistance(ByVal strFolderPath As String) As Boolean
+
+checkFolderExistance = Dir(strFolderPath, vbDirectory) <> vbNullString
+
+
+End Function
