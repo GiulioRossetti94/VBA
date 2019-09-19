@@ -1,0 +1,16 @@
+Sub FindReplaceAll()
+
+Dim sht As Worksheet
+Dim fnd As Variant
+Dim rplc As Variant
+
+fnd = "'[Prova RND dinamico.xlsm]"
+rplc = " "
+
+For Each sht In ActiveWorkbook.Worksheets
+  sht.cells.Replace what:=fnd, Replacement:=rplc, _
+    LookAt:=xlPart, SearchOrder:=xlByRows, MatchCase:=False, _
+    SearchFormat:=False, ReplaceFormat:=False
+Next sht
+
+End Sub

@@ -1,0 +1,84 @@
+Sub parsingUSA()
+
+Dim ws As Worksheet
+Dim date_file_to_parse As String
+Set ws = Worksheets("Performance")
+
+'dat3e handling to retrive file
+
+date_file_to_parse = ws.Range("C4")
+LastRow = ws.Range("H1")
+
+If date_file_to_parse <> ws.cells(LastRow + 1, 9) Then GoTo dateMismatch
+
+Debug.Print (date_file_to_parse = ws.cells(LastRow + 1, 9))
+nameFolder = Format(date_file_to_parse, "yyyymmdd")
+dateNameFile = Format(date_file_to_parse, "dd.mm.yyyy")
+
+year_file = Format(date_file_to_parse, "yyyy")
+month_file = Format(date_file_to_parse, "mm yyyy")
+
+strFilePath = "Y:\Mobiliare\08 Finint Economia Reale Italia\03_Back Office\03_Controlli NAV\" & _
+                year_file & "\" & month_file & "\" & nameFolder & "\" & "PATRIMONIALE_FERI_" & dateNameFile & ".xlsx"
+
+'Debug.Print strFilePath
+
+
+    Close #1
+    strFilePath = "Y:\Mobiliare\08 Finint Economia Reale Italia\03_Back Office\03_Controlli NAV\" & _
+                year_file & "\" & month_file & "\" & nameFolder & "\" & "PATRIMONIALE_FERI_" & dateNameFile & ".xlsx"
+                
+    
+    
+
+    If checkFileExistance(strFilePath) Then
+    
+    Else
+        On Error GoTo retError
+
+    End If
+    
+    Workbooks.Open strFilePath
+    NFile = "PATRIMONIALE_FERI_" & dateNameFile & ".xlsx"
+    Set PatrFeri = Workbooks("PATRIMONIALE_FERI_" & dateNameFile & ".xlsx").Sheets("PROSPETTO QUOTA")
+    Set FundShare = PatrFeri.Range("E32")
+    FundShare = CDbl(FundShare)
+    Set NavCla = PatrFeri.Range("E27")
+    Set NavClPir = PatrFeri.Range("E28")
+    Set Liquidity = PatrFeri.Range("E16")
+    Set OtherAssets = PatrFeri.Range("E17")
+    Set OtherLiabilities = PatrFeri.Range("E25")
+    
+    Liquidity = Liquidity + 0
+    OtherAssets = OtherAssets + 0
+    OtherLiabilities = OtherLiabilities + 0
+    
+    Nav = NavClPir + NavCla
+    Workbooks(NFile).Close SaveChanges:=False
+
+ws.cells(LastRow + 1, 10).Value = Nav
+ws.cells(LastRow + 1, 11) = FundShare
+ws.cells(LastRow + 1, 11).Font.Bold = True
+ws.cells(LastRow + 1, 11).NumberFormat = "#.##0,0"
+
+ws.Range("B8") = OtherAssets
+ws.Range("B9") = OtherLiabilities
+ws.Range("B10") = Liquidity
+
+Debug.Print (date_file_to_parse = ws.cells(LastRow + 1, 9))
+Done:
+   Exit Sub
+
+retError:
+ MsgBox "File Not Found"
+    Exit Sub
+dateMismatch:
+ MsgBox "CONTROLLARE DATE:" & Chr(10) & Chr(10) & "dati dei giorni già presenti o giorni precedenti mancanti", vbCritical, "Date Mismatch"
+
+    
+End Sub
+Private Function checkFileExistance(ByVal strFolderPath As String) As Boolean
+ 
+checkFileExistance = Dir(strFolderPath, vbDirectory) <> vbNullString
+
+End Function
